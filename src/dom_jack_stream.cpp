@@ -2726,7 +2726,7 @@ point_se=jack_se(jack);
 
 std::ofstream outfile;
 string add_output=command_line_opts.OUTPUT_FILE_PATH;
-outfile.open(add_output.c_str(), std::ios_base::app);
+outfile.open(add_output.c_str(), std::ios_base::out);
 
 cout<<endl<<"OUTPUT: "<<endl<<"Variances: "<<endl;
 outfile<<"OUTPUT: "<<endl<<"Variances: "<<endl;
