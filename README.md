@@ -1,5 +1,5 @@
 # RHE-mc
-Randomized Heritability Estimation for Multi-variance Components
+Randomized Haseman–Elston regression for Multi-variance Components
 
 
 
