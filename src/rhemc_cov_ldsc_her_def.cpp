@@ -115,7 +115,7 @@ MatrixXdr jack_bin_size;
 vector<int> len;
 vector<int> Annot;
 int Njack=100;
-int Nbin=160;
+int Nbin=0;
 int Nz=10;
 ///////
 
