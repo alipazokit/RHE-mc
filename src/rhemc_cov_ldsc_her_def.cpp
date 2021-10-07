@@ -2155,7 +2155,7 @@ double temp_sig=0;
 double temp_sum=0;
 
 std::ofstream outfile;
-string add_output=command_line_opts.OUTPUT_FILE_PATH;
+string add_output=command_line_opts.OUTPUT_PATH;
 outfile.open(add_output.c_str(), std::ios_base::out);
 
 cout<<endl<<"OUTPUT: "<<endl<<"Variances: "<<endl;
