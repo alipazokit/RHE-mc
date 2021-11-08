@@ -74,7 +74,7 @@ chmod +x test.sh
 
 ## Citation
 ```
-Pazokitoroudi, A., Wu, Y. et al. Efficient variance components analysis across millions of genomes. Nat Commun 11, 4020 (2020). https://doi.org/10.1038/s41467-020-17576-9
+Pazokitoroudi, A. et al. Efficient variance components analysis across millions of genomes. Nat Commun 11, 4020 (2020). https://doi.org/10.1038/s41467-020-17576-9
 ```
 
 
