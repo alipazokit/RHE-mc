@@ -417,11 +417,6 @@ mailman::fastmultiply_pre(g.segment_size_hori,g.Nindv,Ncol_op, seg_iter * g.segm
 
 void initial_var()
 {
-    /*if(key==1)
-        g=g1;
-    if(key==2)
-        g=g2;*/
-   // g=Geno[key];
         
 
 	p = g.Nsnp;
@@ -469,99 +464,10 @@ void initial_var()
         y_m = new double*[hsegsize];
         for (int i = 0 ; i < hsegsize ; i++)
                 y_m[i] = new double[blocksize];
-      /*  for(int i=0;i<p;i++){
-                means(i,0) = g.get_col_mean(i);
-                stds(i,0) =1/g.get_col_std(i);
-                //sum2(i,0) =g.get_col_sum2(i); 
-                sum(i,0)= g.get_col_sum(i);
-        }
-
-*/
-
 
 }
  
 
-
-
-/*void read_cov(int Nind, std::string filename, std::string covname){
-	ifstream ifs(filename.c_str(), ios::in); 
-	std::string line; 
-	std::istringstream in; 
-	int covIndex = 0; 
-	std::getline(ifs,line); 
-	in.str(line); 
-	string b;
-	vector<vector<int> > missing; 
-	int covNum=0;  
-	while(in>>b)
-	{
-		missing.push_back(vector<int>()); //push an empty row  
-		if(b==covname && covname!="")
-			covIndex=covNum; 
-		covNum++; 
-	}
-	vector<double> cov_sum(covNum, 0); 
-	if(covname=="")
-	{
-		covariate.resize(Nind, covNum); 
-		cout<< "Read in "<<covNum << " Covariates.. "<<endl;
-	}
-	else 
-	{
-		covariate.resize(Nind, 1); 
-		cout<< "Read in covariate "<<covname<<endl;  
-	}
-
-	
-	int j=0; 
-	while(std::getline(ifs, line)){
-		in.clear(); 
-		in.str(line);
-		string temp; 
-		for(int k=0; k<covNum; k++){
-			in>>temp;
-			if(temp=="NA")
-			{
-				missing[k].push_back(j);
-				continue;  
-			} 
-			int cur = atof(temp.c_str()); 
-			if(cur==-9)
-			{
-				missing[k].push_back(j); 
-				continue; 
-			}
-			if(covname=="")
-			{
-				cov_sum[k]= cov_sum[k]+ cur; 
-				covariate(j,k) = cur; 
-			}
-			else
-				if(k==covIndex)
-				{
-					covariate(j, 0) = cur;
-					cov_sum[k] = cov_sum[k]+cur; 
-				}
-		} 
-		j++;
-	}
-	//compute cov mean and impute 
-	for (int a=0; a<covNum ; a++)
-	{
-		int missing_num = missing[a].size(); 
-		cov_sum[a] = cov_sum[a] / (covNum - missing_num);
-
-		for(int b=0; b<missing_num; b++)
-		{
-                        int index = missing[a][b];
-                        if(covname=="")
-                                covariate(index, a) = cov_sum[a];
-                        else if (a==covIndex)
-                                covariate(index, 0) = cov_sum[a];
-                } 
-	}
-}*/
 void read_pheno2(int Nind, std::string filename){
 //	pheno.resize(Nind,1); 
 	ifstream ifs(filename.c_str(), ios::in); 
@@ -915,13 +821,15 @@ void read_annot (string filename){
 			//cout<<i<<"xxx"<<j<<"xxx"<<temp<<endl;
 			jack_bin[temp][j]++;	
 		 }
+
 /*	
 cout<<"jackbin"<<endl;
 	for (int i=0;i<Njack;i++){
 	   for(int j=0;j<Nbin;j++)
                 cout<<jack_bin[i][j]<<" ";
 	  cout<<endl;
-        }*/
+        }
+*/
 /*
 for (int i=0;i<linenum;i++){
   for(int j=0;j<Nbin;j++)
@@ -1118,112 +1026,6 @@ float get_observed_pj(const unsigned char* line){
         return observed_sum*0.5/observed_ct;
 
 }
-
-
-
-void read_bed (std::istream& ifs,bool allow_missing,int num_snp)  {
-         //ifstream ifs (filename.c_str(), ios::in|ios::binary);
-        char magic[3];
-        set_metadata ();
-
-    gtype =  new unsigned char[ncol];
-
-     if(read_header)  
-      binary_read(ifs,magic);
-
-        int sum=0;
-
-        // Note that the coding of 0 and 2 can get flipped relative to plink because plink uses allele frequency (minor)
-        // allele to code a SNP as 0 or 1.
-        // This flipping does not matter for results.
-        int y[4];
-        
-for(int i=0;i<num_snp;i++){
-		global_snp_index++;
-                ifs.read (reinterpret_cast<char*>(gtype), ncol*sizeof(unsigned char));
-                float p_j = get_observed_pj(gtype);
-        for (int k = 0 ;k < ncol ; k++) {
-                unsigned char c = gtype [k];
-                        // Extract PLINK genotypes
-                y[0] = (c)&mask2;
-                y[1] = (c>>2)&mask2;
-                y[2] = (c>>4)&mask2;
-                y[3] = (c>>6)&mask2;
-                        int j0 = k * unitsperword;
-                        // Handle number of individuals not being a multiple of 4
-                        int lmax = 4;
-                        if (k == ncol - 1)  {
-                                lmax = Nindv%4;
-                                lmax = (lmax==0)?4:lmax;
-                        }
-                        for ( int l = 0 ; l < lmax; l++){
-                                int j = j0 + l ;
-                                // Extract  PLINK coded genotype and convert into 0/1/2
-                                // PLINK coding: 
-                                // 00->0
-                                // 01->missing
-                                // 10->1
-                                // 11->2
-                                int val = y[l];
-                                if(val==1 && !allow_missing){
-                                        val = simulate2_geno_from_random(p_j);
-                                        val++;
-                                        val = (val==1) ? 0 : val;
-  //                                 val=0;
-				 }
-                                val-- ;
-                                val =  (val < 0 ) ? 0 :val ;
-				sum += val;
-			   
-			    for(int bin_index=0;bin_index<Nbin;bin_index++){
-				if(annot_bool[global_snp_index][bin_index]==1){
-                        	    
-				      int snp_index;
-				     //int snp_index=allgen[bin_index].index;
-				     //allgen[bin_index].gen(snp_index,j)=val;
-						
-				     if(use_mailman==true){
-				 	 snp_index=allgen_mail[bin_index].index;
-					 int horiz_seg_no = snp_index/allgen_mail[bin_index].segment_size_hori; 
-					 allgen_mail[bin_index].p[horiz_seg_no][j] = 3 *allgen_mail[bin_index].p[horiz_seg_no][j]  + val;	 
-				     // computing sum for every snp to compute mean
-				         allgen_mail[bin_index].columnsum[snp_index]+=val;
-
-				      }
-				     else{
-					 snp_index=allgen[bin_index].index;
-                                         allgen[bin_index].gen(snp_index,j)=val;
-				     }
-				
-				}
- 			     
-			    }
-
-                    }
-        }
-
-    for(int bin_index=0;bin_index<Nbin;bin_index++)
-       if(annot_bool[global_snp_index][bin_index]==1){
-       		//cout<<"global"<<global_snp_index<<endl;
-		        //cout<<allgen[bin_index].index<<endl; 
-		//       allgen[bin_index].index++;
-	
-	      if(use_mailman==true)
-		  allgen_mail[bin_index].index++;
-	       else
-	           allgen[bin_index].index++;		
-	}
-
-    
-
-   }        
-	
-	sum = 0 ;
-        delete[] gtype;
-}
-
-
-
 
 void read_bed2 (std::istream& ifs,bool allow_missing,int num_snp)  {
          //ifstream ifs (filename.c_str(), ios::in|ios::binary);
@@ -1633,7 +1435,6 @@ y_sum=pheno.sum();
 //Nz=1;
 
 all_zb= MatrixXdr::Random(Nindv,Nz);
-all_zb = all_zb * sqrt(3);
 
 boost::mt19937 seedr;
 seedr.seed(std::time(0));
@@ -1673,19 +1474,15 @@ for (int j=0;j<Nz;j++){
 MatrixXdr output;
 //define 
 
-//e
-//Njack=1;
 
 XXz=MatrixXdr::Zero(Nindv,Nbin*(Njack+1)*Nz);
 
 if(both_side_cov==true){
 UXXz=MatrixXdr::Zero(Nindv,Nbin*(Njack+1)*Nz);
 XXUz=MatrixXdr::Zero(Nindv,Nbin*(Njack+1)*Nz);
-//Xz=MatrixXdr::Zero(Nindv,Nbin*(Njack+1)*Nz);
 }
 yXXy=MatrixXdr::Zero(Nbin,Njack+1);
 
-//allgen.resize(Nbin);
 if(use_mailman==true) 
   allgen_mail.resize(Nbin);
 else
@@ -1850,20 +1647,7 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 	   if(num_snp==len[bin_index])
 		yXXy(bin_index,jack_index)=0;
 
-	  //compute Xz
-/*
-	  if(both_side_cov==true){
-		MatrixXdr out2=compute_Xz(num_snp);
-		 for (int z_index=0;z_index<Nz;z_index++){
-			  if(num_snp!=len[bin_index])
-		          Xz.col((bin_index*(Njack+1)*Nz)+(jack_index*Nz)+z_index)=out2.col(z_index);
-                 	  Xz.col((bin_index*(Njack+1)*Nz)+(Njack*Nz)+z_index)+=out2.col(z_index);	
-		 }
-	  }
-
-*/
 	
-	cout<<num_snp<< "SNPs in bin "<<bin_index<<"of jack "<<jack_index<<endl;   
 	cout<<" Reading and computing bin "<<bin_index <<"  of "<< jack_index<<"-th is finished"<<endl;
 	   
 	    if(use_mailman==true){
@@ -2011,13 +1795,17 @@ double trkij_res2;
 double trkij_res3;
 double tk_res;
 for (jack_index=0;jack_index<=Njack;jack_index++){
-  for (int i=0;i<Nbin;i++){
+    for(int f=0;f<Nbin;f++)
+	 if( jack_index<Njack && len[f]==jack_bin[jack_index][f])
+                 jack_bin[jack_index][f]=0;  
+
+   for (int i=0;i<Nbin;i++){
 
 	if(both_side_cov==false)	
              b_trk(i,0)=Nindv_mask;
 
-	if( jack_index<Njack && len[i]==jack_bin[jack_index][i])
-		 jack_bin[jack_index][i]=0;
+//	if( jack_index<Njack && len[i]==jack_bin[jack_index][i])
+//		 jack_bin[jack_index][i]=0;
 
 
         if(jack_index==Njack)
@@ -2121,32 +1909,25 @@ for (jack_index=0;jack_index<=Njack;jack_index++){
 X_l<<A_trs,b_trk,b_trk.transpose(),NC;
 Y_r<<c_yky,yy;
 
-/*if(jack_index==Njack){
-   cout<<X_l<<endl;
-   cout<<Y_r<<endl;
-}
-  */ 
 MatrixXdr herit=X_l.colPivHouseholderQr().solve(Y_r);
 
-
+/*
+cout<<"Xl"<<X_l<<endl;
+cout<<"Yl"<<Y_r<<endl;
+cout<<"sigma"<<herit<<endl;
+*/
 if(jack_index==Njack){
-    cout<<"Xl"<<X_l<<endl;
-	cout<<"Yl"<<Y_r<<endl;
+    cout<<"Xl"<<endl<<X_l<<endl;
+	cout<<"Yl"<<endl<<Y_r<<endl;
 
      for(int i=0;i<(Nbin+1);i++)
           point_est(i,0)=herit(i,0);
 }
 else{
-//if (jack_index==1)
-  // cout<<"Xl"<<X_l<<endl;
 for(int i=0;i<(Nbin+1);i++)
       jack(i,jack_index)=herit(i,0);
 }
 
-/*double total_val=0;
-for(int i=0; i<Nbin;i++)
-    total_val+=herit(i,0);
-*/
 
 }//end of loop over jack
 
@@ -2160,12 +1941,15 @@ outfile.open(add_output.c_str(), std::ios_base::out);
 
 cout<<endl<<"OUTPUT: "<<endl<<"Variances: "<<endl;
 outfile<<"OUTPUT: "<<endl<<"Variances: "<<endl;
+
+MatrixXdr se_point_est=jack_se(jack);
+
 for (int j=0;j<Nbin;j++){
-        cout<<"Sigma^2_"<<j<<": "<<point_est(j,0)<<endl;
-	outfile<<"Sigma^2_"<<j<<": "<<point_est(j,0)<<endl;
+        cout<<"Sigma^2_"<<j<<": "<<point_est(j,0)<<" SE: "<<se_point_est(j,0)<<endl;
+	outfile<<"Sigma^2_"<<j<<": "<<point_est(j,0)<<" SE: "<<se_point_est(j,0)<<endl;
 }
-cout<<"Sigma^2_e: "<<point_est(Nbin,0)<<endl;
-outfile<<"Sigma^2_e: "<<point_est(Nbin,0)<<endl;
+cout<<"Sigma^2_e: "<<point_est(Nbin,0)<<" SE: "<<se_point_est(Nbin,0)<<endl;
+outfile<<"Sigma^2_e: "<<point_est(Nbin,0)<<" SE: "<<se_point_est(Nbin,0)<<endl;
 
 
 ///compute h^2s
@@ -2213,12 +1997,7 @@ for(int i=0;i<Nbin;i++){
 }
 
 }
-//MatrixXdr her_per_snp;
-//MatrixXdr her_cat_ldsc;
-//MatrixXdr point_her_cat_ldsc;
 her_per_snp=MatrixXdr::Zero(Nsnp,1);
-//her_cat_ldsc=MatrixXdr::Zero(Nbin,Njack);
-//point_her_cat_ldsc=MatrixXdr::Zero(Nbin,1);
 
 for(int i=0;i<Nsnp;i++){
    for(int j=0;j<Nbin;j++){
@@ -2247,42 +2026,10 @@ for(int i=0;i<Nsnp;i++){
 
 
 
-/*for(int i=0;i<Nsnp;i++){
-   for(int j=0;j<Nbin;j++){
-        int temp=i/step_size;
-        if (temp==Njack)
-             temp--;
-        if (annot_bool[i][j]==1){
-                her_cat_ldsc(j,temp)+=her_per_snp(i,0);
-//              her_cat_ldsc(j,Njack)+=her_per_snp(i,0);
-        }
-   }
-}
-*/
-
-//cout<<her_cat_ldsc<<endl;
-//MatrixXdr point_her_cat_ldsc=her_cat_ldsc.rowwise().sum();
-//cout<<point_her_cat_ldsc<<endl;
-
-//for (int i=0;i<Nbin;i++)
- //   for(int j=0;j<Njack;j++)
-   //        her_cat_ldsc(i,j)=point_her_cat_ldsc(i,0)- her_cat_ldsc(i,j);
-
-
-
-//cout<<point_her_cat_ldsc<<endl;
 
 
 MatrixXdr se_her_cat_ldsc=jack_se(her_cat_ldsc);
-//cout<<se_her_cat_ldsc<<endl;
 
-/*cout<<endl<<"Heritabilities(overlap): "<<endl;
-outfile<<"Heritabilities(overlap): "<<endl;
-for (int j=0;j<Nbin;j++){
-     cout<<"overlap h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" ,  SE: "<<se_her_cat_ldsc(j,0)<<endl;
-     outfile<<"overlap h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" ,  SE: "<<se_her_cat_ldsc(j,0)<<endl;
-}
-*/
 
 cout<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based on Equation 9 (overlapping setting) in the paper  https://doi.org/10.1038/s41467-020-17576-9:"<<endl;
 outfile<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based on Equation 9 (overlapping setting) in the paper  https://doi.org/10.1038/s41467-020-17576-9:"<<endl;
@@ -2290,8 +2037,8 @@ outfile<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based 
 cout<<endl<<"h^2's: "<<endl;
 outfile<<"h^2's: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" ,  se: "<<se_her_cat_ldsc(j,0)<<endl;
-     outfile<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" ,  se: "<<se_her_cat_ldsc(j,0)<<endl;
+     cout<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
+     outfile<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
 }
 
 
@@ -2320,8 +2067,8 @@ for (int j=0;j<Nbin;j++){
 cout<<endl<<"h^2_i/h^2_t: "<<endl;
 outfile<<"h^2_i/h^2_t: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<",  se: "<<se_her_cat_ldsc(j,0)<<endl;
-     outfile<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<",  se: "<<se_her_cat_ldsc(j,0)<<endl;
+     cout<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
+     outfile<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
 }
 
 
@@ -2329,8 +2076,8 @@ cout<<endl<<"Enrichments: "<<endl;
 outfile<<"Enrichments: "<<endl;
 for (int j=0;j<Nbin;j++){
         double snp_por=(double)len[j]/Nsnp;
-     cout<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<",  se: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
-     outfile<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<",  se: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
+     cout<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<" SE: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
+     outfile<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<" SE: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
 }
 
 
@@ -2388,91 +2135,24 @@ MatrixXdr enrich_SEjack;
 enrich_SEjack=MatrixXdr::Zero(Nbin,1);
 enrich_SEjack=jack_se(enrich_jack);
 
-
-
-
-
-
-/*
-////compute jackknife SE
-MatrixXdr sum_row=jack.rowwise().mean();
-MatrixXdr SEjack;
-SEjack=MatrixXdr::Zero(Nbin+1,1);
-double temp_val=0;
-for (int i=0;i<=Nbin;i++){
-    for (int j=0;j<Njack;j++){
-        temp_val=jack(i,j)-sum_row(i);
-        temp_val= temp_val* temp_val;
-        SEjack(i,0)+=temp_val;
-    }
-    SEjack(i,0)=SEjack(i,0)*(Njack-1)/Njack;
-    SEjack(i,0)=sqrt(SEjack(i,0));
-}
-///////// compute jackknife SE of enrichment
-MatrixXdr sum_row=enrich_jack.rowwise().mean();
-MatrixXdr enrich_SEjack;
-enrich_SEjack=MatrixXdr::Zero(Nbin,1);
- double temp_val=0;
-for (int i=0;i<Nbin;i++){
-    for (int j=0;j<Njack;j++){
-        temp_val=enrich_jack(i,j)-sum_row(i);
-        temp_val= temp_val* temp_val;
-        enrich_SEjack(i,0)+=temp_val;
-    }
-    enrich_SEjack(i,0)=enrich_SEjack(i,0)*(Njack-1)/Njack;
-    enrich_SEjack(i,0)=sqrt(enrich_SEjack(i,0));
-}
-*/
-
-/*
-cout<<endl<<"Heritabilities: "<<endl;
-outfile<<"Heritabilities: "<<endl;
-for (int j=0;j<Nbin;j++){
-     cout<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<" ,  SE: "<<SEjack(j,0)<<endl;
-     outfile<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<" ,  SE: "<<SEjack(j,0)<<endl;
-}
-cout<<"Total h^2 : "<<point_est(Nbin,0)<<" , SE: "<<SEjack(Nbin,0)<<endl;
-outfile<<"Total h^2 : "<<point_est(Nbin,0)<<" , SE: "<<SEjack(Nbin,0)<<endl;
-cout<<endl<<"Enrichments: "<<endl;
-outfile<<"Enrichments: "<<endl;
-for (int j=0;j<Nbin;j++){
-     cout<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" ,  SE: "<<enrich_SEjack(j,0)<<endl;
-     outfile<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" ,  SE: "<<enrich_SEjack(j,0)<<endl;
-}*/
-
 cout<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based on Equations 2-4 (non-overlapping setting) in the paper  https://doi.org/10.1038/s41467-020-17576-9:"<<endl;
 outfile<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based on Equations 2-4 (non-overlapping setting) in the paper  https://doi.org/10.1038/s41467-020-17576-9:"<<endl;
 
 cout<<endl<<"h^2's: "<<endl;
 outfile<<"h^2's: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<",  se: "<<SEjack(j,0)<<endl;
-     outfile<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<",  se: "<<SEjack(j,0)<<endl;
+     cout<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<" SE: "<<SEjack(j,0)<<endl;
+     outfile<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<" SE: "<<SEjack(j,0)<<endl;
 }
-cout<<"Total h^2 : "<<point_est(Nbin,0)<<", se: "<<SEjack(Nbin,0)<<endl;
-outfile<<"Total h^2 : "<<point_est(Nbin,0)<<", se: "<<SEjack(Nbin,0)<<endl;
+cout<<"Total h^2 : "<<point_est(Nbin,0)<<" SE: "<<SEjack(Nbin,0)<<endl;
+outfile<<"Total h^2 : "<<point_est(Nbin,0)<<" SE: "<<SEjack(Nbin,0)<<endl;
 
 cout<<endl<<"Enrichments: "<<endl;
 outfile<<"Enrichments: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" ,  se: "<<enrich_SEjack(j,0)<<endl;
-     outfile<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" ,  se: "<<enrich_SEjack(j,0)<<endl;
+     cout<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" SE: "<<enrich_SEjack(j,0)<<endl;
+     outfile<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" SE: "<<enrich_SEjack(j,0)<<endl;
 }
 
-
-/*std::ofstream outfile;
-string add_output=command_line_opts.OUTPUT_FILE_PATH;
-outfile.open(add_output.c_str(), std::ios_base::app);
-
-outfile<<"Point estimates: "<<endl;
-outfile<<point_est.transpose()<<endl;
-outfile<<"SEs     :"<<endl;
-outfile<<SEjack.transpose()<<endl;
-
-outfile<<"Enrichment: "<<endl;
-outfile<<enrich_point_est.transpose()<<endl;
-outfile<<"SEs     :"<<endl;
-outfile<<enrich_SEjack.transpose()<<endl;
-*/
 	return 0;
 }

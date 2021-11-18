@@ -496,84 +496,6 @@ void initial_var()
 
 
 
-/*void read_cov(int Nind, std::string filename, std::string covname){
-	ifstream ifs(filename.c_str(), ios::in); 
-	std::string line; 
-	std::istringstream in; 
-	int covIndex = 0; 
-	std::getline(ifs,line); 
-	in.str(line); 
-	string b;
-	vector<vector<int> > missing; 
-	int covNum=0;  
-	while(in>>b)
-	{
-		missing.push_back(vector<int>()); //push an empty row  
-		if(b==covname && covname!="")
-			covIndex=covNum; 
-		covNum++; 
-	}
-	vector<double> cov_sum(covNum, 0); 
-	if(covname=="")
-	{
-		covariate.resize(Nind, covNum); 
-		cout<< "Read in "<<covNum << " Covariates.. "<<endl;
-	}
-	else 
-	{
-		covariate.resize(Nind, 1); 
-		cout<< "Read in covariate "<<covname<<endl;  
-	}
-
-	
-	int j=0; 
-	while(std::getline(ifs, line)){
-		in.clear(); 
-		in.str(line);
-		string temp; 
-		for(int k=0; k<covNum; k++){
-			in>>temp;
-			if(temp=="NA")
-			{
-				missing[k].push_back(j);
-				continue;  
-			} 
-			int cur = atof(temp.c_str()); 
-			if(cur==-9)
-			{
-				missing[k].push_back(j); 
-				continue; 
-			}
-			if(covname=="")
-			{
-				cov_sum[k]= cov_sum[k]+ cur; 
-				covariate(j,k) = cur; 
-			}
-			else
-				if(k==covIndex)
-				{
-					covariate(j, 0) = cur;
-					cov_sum[k] = cov_sum[k]+cur; 
-				}
-		} 
-		j++;
-	}
-	//compute cov mean and impute 
-	for (int a=0; a<covNum ; a++)
-	{
-		int missing_num = missing[a].size(); 
-		cov_sum[a] = cov_sum[a] / (covNum - missing_num);
-
-		for(int b=0; b<missing_num; b++)
-		{
-                        int index = missing[a][b];
-                        if(covname=="")
-                                covariate(index, a) = cov_sum[a];
-                        else if (a==covIndex)
-                                covariate(index, 0) = cov_sum[a];
-                } 
-	}
-}*/
 void read_pheno2(int Nind, std::string filename){
 //	pheno.resize(Nind,1); 
 	ifstream ifs(filename.c_str(), ios::in); 
@@ -927,14 +849,15 @@ void read_annot (string filename){
 			//cout<<i<<"xxx"<<j<<"xxx"<<temp<<endl;
 			jack_bin[temp][j]++;	
 		 }
-/*	
+/*
 cout<<"jackbin"<<endl;
 	for (int i=0;i<Njack;i++){
 	   for(int j=0;j<Nbin;j++)
                 cout<<jack_bin[i][j]<<" ";
 	  cout<<endl;
-        }*/
-/*
+        }
+*/
+/*cout<<"annnot"<<endl;
 for (int i=0;i<linenum;i++){
   for(int j=0;j<Nbin;j++)
 	cout<<annot_bool[i][j]<<" ";
@@ -1130,111 +1053,6 @@ float get_observed_pj(const unsigned char* line){
         return observed_sum*0.5/observed_ct;
 
 }
-
-
-
-void read_bed (std::istream& ifs,bool allow_missing,int num_snp)  {
-         //ifstream ifs (filename.c_str(), ios::in|ios::binary);
-        char magic[3];
-        set_metadata ();
-
-    gtype =  new unsigned char[ncol];
-
-     if(read_header)  
-      binary_read(ifs,magic);
-
-        int sum=0;
-
-        // Note that the coding of 0 and 2 can get flipped relative to plink because plink uses allele frequency (minor)
-        // allele to code a SNP as 0 or 1.
-        // This flipping does not matter for results.
-        int y[4];
-        
-for(int i=0;i<num_snp;i++){
-		global_snp_index++;
-                ifs.read (reinterpret_cast<char*>(gtype), ncol*sizeof(unsigned char));
-                float p_j = get_observed_pj(gtype);
-        for (int k = 0 ;k < ncol ; k++) {
-                unsigned char c = gtype [k];
-                        // Extract PLINK genotypes
-                y[0] = (c)&mask2;
-                y[1] = (c>>2)&mask2;
-                y[2] = (c>>4)&mask2;
-                y[3] = (c>>6)&mask2;
-                        int j0 = k * unitsperword;
-                        // Handle number of individuals not being a multiple of 4
-                        int lmax = 4;
-                        if (k == ncol - 1)  {
-                                lmax = Nindv%4;
-                                lmax = (lmax==0)?4:lmax;
-                        }
-                        for ( int l = 0 ; l < lmax; l++){
-                                int j = j0 + l ;
-                                // Extract  PLINK coded genotype and convert into 0/1/2
-                                // PLINK coding: 
-                                // 00->0
-                                // 01->missing
-                                // 10->1
-                                // 11->2
-                                int val = y[l];
-                                if(val==1 && !allow_missing){
-                                        val = simulate2_geno_from_random(p_j);
-                                        val++;
-                                        val = (val==1) ? 0 : val;
-  //                                 val=0;
-				 }
-                                val-- ;
-                                val =  (val < 0 ) ? 0 :val ;
-				sum += val;
-			   
-			    for(int bin_index=0;bin_index<Nbin;bin_index++){
-				if(annot_bool[global_snp_index][bin_index]==1){
-                        	    
-				      int snp_index;
-				     //int snp_index=allgen[bin_index].index;
-				     //allgen[bin_index].gen(snp_index,j)=val;
-						
-				     if(use_mailman==true){
-				 	 snp_index=allgen_mail[bin_index].index;
-					 int horiz_seg_no = snp_index/allgen_mail[bin_index].segment_size_hori; 
-					 allgen_mail[bin_index].p[horiz_seg_no][j] = 3 *allgen_mail[bin_index].p[horiz_seg_no][j]  + val;	 
-				     // computing sum for every snp to compute mean
-				         allgen_mail[bin_index].columnsum[snp_index]+=val;
-
-				      }
-				     else{
-					 snp_index=allgen[bin_index].index;
-                                         allgen[bin_index].gen(snp_index,j)=val;
-				     }
-				
-				}
- 			     
-			    }
-
-                    }
-        }
-
-    for(int bin_index=0;bin_index<Nbin;bin_index++)
-       if(annot_bool[global_snp_index][bin_index]==1){
-       		//cout<<"global"<<global_snp_index<<endl;
-		        //cout<<allgen[bin_index].index<<endl; 
-		//       allgen[bin_index].index++;
-	
-	      if(use_mailman==true)
-		  allgen_mail[bin_index].index++;
-	       else
-	           allgen[bin_index].index++;		
-	}
-
-    
-
-   }        
-	
-	sum = 0 ;
-        delete[] gtype;
-}
-
-
 
 
 void read_bed2 (std::istream& ifs,bool allow_missing,int num_snp)  {
@@ -1534,7 +1352,7 @@ double tk_res;
 for (int jack_index=0;jack_index<Njack;jack_index++){	
 
 	int read_Nsnp=(jack_index<(Njack-1)) ? (step_size) : (step_size+step_size_rem);
-	
+	cout<<"Reading block "<<jack_index<<endl;
 
        if(use_mailman==true){
         for (int i=0;i<Nbin;i++){
@@ -1554,9 +1372,9 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 	 }
        }
        else{
-	   for (int bin_index=0;bin_index<Nbin;bin_index++){
-                allgen[bin_index].gen.resize(jack_bin[jack_index][bin_index],Nindv);
-                allgen[bin_index].index=0;
+	   for (int k=0;k<Nbin;k++){
+                allgen[k].gen.resize(jack_bin[jack_index][k],Nindv);
+                allgen[k].index=0;
            }
        }
 
@@ -1573,12 +1391,13 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 		num_snp=allgen_mail[bin_index].index;
 	  else
 		num_snp=allgen[bin_index].index;
-
+	
+	  //cout<<"bin number"<<bin_index<<"number of SNPs"<<num_snp<<endl;
 
 	  if(num_snp!=0){
 	  stds.resize(num_snp,1);
 	  means.resize(num_snp,1);
-	  
+	//  	   cout<<"bin number"<<bin_index<<"number of SNPs"<<num_snp<<endl;
 	  if(use_mailman==true){
 		for (int i=0;i<num_snp;i++)
 		   means(i,0)=(double)allgen_mail[bin_index].columnsum[i]/Nindv;
@@ -1610,9 +1429,10 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 	   for (int z_index=0;z_index<Nz;z_index++){
 		//if(num_snp!=len[bin_index])
                  //XXz.col((bin_index*(Njack+1)*Nz)+(jack_index*Nz)+z_index)=output.col(z_index);
-                 if(pass_num==1)
+                 if(pass_num==1){
 		         XXz.col((bin_index*2*Nz)+Nz+z_index)+=output.col(z_index);   /// save whole sample
-		 else
+		 }
+		 else if(num_snp!=len[bin_index])
 			 XXz.col((bin_index*2*Nz)+z_index)=XXz.col((bin_index*2*Nz)+Nz+z_index)-output.col(z_index);   /// save corresponding jack contrib
 
 		 if(both_side_cov==true) {
@@ -1620,11 +1440,11 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 		  w1=covariate.transpose()*vec1;
                   w2=Q*w1;
                   w3=covariate*w2;
-		  //if(num_snp!=len[bin_index])
-		  //UXXz.col((bin_index*(Njack+1)*Nz)+(jack_index*Nz)+z_index)=w3;
-		  if(pass_num==1)
+		  if(pass_num==1){
 		     UXXz.col((bin_index*2*Nz)+Nz+z_index)+=w3;
-		  else
+		     UXXz.col((bin_index*2*Nz)+z_index)+=w3;
+		  }
+		  else if(num_snp!=len[bin_index])
 		     UXXz.col((bin_index*2*Nz)+z_index)=UXXz.col((bin_index*2*Nz)+Nz+z_index)-w3;
 
 		 }
@@ -1634,11 +1454,10 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 	   if (both_side_cov==true){
 	      output=compute_XXUz(num_snp); 
 	      for (int z_index=0;z_index<Nz;z_index++){
-           //        if(num_snp!=len[bin_index])
-	//	   XXUz.col((bin_index*(Njack+1)*Nz)+(jack_index*Nz)+z_index)=output.col(z_index);
-                if(pass_num==1)
+                if(pass_num==1){
 		   XXUz.col((bin_index*2*Nz)+Nz+z_index)+=output.col(z_index);   /// save whole sample
-	        else
+		}
+	        else if(num_snp!=len[bin_index])
 		    XXUz.col((bin_index*2*Nz)+z_index)=XXUz.col((bin_index*2*Nz)+Nz+z_index)-output.col(z_index);
 	      }	 
 	  }
@@ -1650,16 +1469,16 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
 	   else
 	   temp_yxxy= compute_yVXXVy(num_snp);
 
-	  if(pass_num==1)
+	  if(pass_num==1){
            yXXy(bin_index,1)+=temp_yxxy;
-	  else
+	  }
+	  else if(num_snp!=len[bin_index]){
 	     yXXy(bin_index,0)= yXXy(bin_index,1)-temp_yxxy;
-	   //if(num_snp==len[bin_index])
-	//	yXXy(bin_index,jack_index)=0;
+	   }
 
 	
-	cout<<num_snp<< "SNPs in bin "<<bin_index<<"of jack "<<jack_index<<endl;   
-	cout<<" Reading and computing bin "<<bin_index <<"  of "<< jack_index<<"-th is finished"<<endl;
+	//cout<<num_snp<< "SNPs in bin "<<bin_index<<"of jack "<<jack_index<<endl;   
+	//cout<<" Reading and computing bin "<<bin_index <<"  of "<< jack_index<<"-th is finished"<<endl;
 	   
 	    if(use_mailman==true){
 		delete[] sum_op;
@@ -1694,40 +1513,18 @@ for (int jack_index=0;jack_index<Njack;jack_index++){
      }
 //cout<<" Reading and computing  of "<< jack_index<<"-th is finished"<<endl;
 
-if(pass_num!=1){
+if(pass_num==2){
    
 
-/*
-if(both_side_cov==true){
-MatrixXdr Wty=covariate.transpose()*pheno; //W^ty
-MatrixXdr QWty=Q*Wty;
-double temp=(Wty.array() * QWty.array()).sum();
-	yy=yy-temp;
-}
+for(int l=0;l<Nbin;l++)
+   if( len[l]==jack_bin[jack_index][l])
+        jack_bin[jack_index][l]=0;
 
-
-
-
- Nindv_mask=mask.sum();
-if(both_side_cov==true)
-   NC=Nindv_mask-cov_num;
-else
-   NC=Nindv_mask;
-
-*/
-  
 for (int i=0;i<Nbin;i++){
 
 	if(both_side_cov==false)	
              b_trk(i,0)=Nindv_mask;
 
-	if( jack_index<Njack && len[i]==jack_bin[jack_index][i])
-		 jack_bin[jack_index][i]=0;
-
-
-        //if(jack_index==Njack)
-        //c_yky(i,0)=yXXy(i,0)/len[i];
-        //else
         c_yky(i,0)=yXXy(i,0)/(len[i]-jack_bin[jack_index][i]);
   
        
@@ -1737,10 +1534,7 @@ for (int i=0;i<Nbin;i++){
         C2=C1.colwise().sum();	
 	tk_res=C2.sum();  
 
-	//if(jack_index==Njack)
-          //  tk_res=tk_res/len[i]/Nz;
-        //else
-           tk_res=tk_res/(len[i]-jack_bin[jack_index][i])/Nz;
+        tk_res=tk_res/(len[i]-jack_bin[jack_index][i])/Nz;
 
         b_trk(i,0)=Nindv_mask-tk_res;
 	}
@@ -1774,10 +1568,6 @@ for (int i=0;i<Nbin;i++){
 			
 	     }
 
-
-                //if(jack_index==Njack)
-              //  trkij=trkij/len[i]/len[j]/Nz;
-                //else
                  trkij=trkij/(len[i]-jack_bin[jack_index][i])/(len[j]-jack_bin[jack_index][j])/Nz;
                 A_trs(i,j)=trkij;
                 A_trs(j,i)=trkij;
@@ -1788,19 +1578,32 @@ for (int i=0;i<Nbin;i++){
 
 X_l<<A_trs,b_trk,b_trk.transpose(),NC;
 Y_r<<c_yky,yy;
-
- herit=X_l.colPivHouseholderQr().solve(Y_r);
-
+herit=X_l.colPivHouseholderQr().solve(Y_r);
+/*
+cout<<"X_l"<<endl<<X_l<<endl;
+cout<<"Y_r"<<endl<<Y_r<<endl;
+cout<<"herit"<<endl<<herit<<endl;
+*/
 for(int i=0;i<(Nbin+1);i++)
       jack(i,jack_index)=herit(i,0);
 
 
+//handle when a jackknife block does not include any SNPs from a bin
+
+for (int bin_index=0;bin_index<Nbin;bin_index++){
+         for (int z_index=0;z_index<Nz;z_index++){
+                  XXz.col((bin_index*2*Nz)+z_index)=XXz.col((bin_index*2*Nz)+Nz+z_index);
+                  if(both_side_cov==true){
+                  UXXz.col((bin_index*2*Nz)+z_index)=UXXz.col((bin_index*2*Nz)+Nz+z_index);
+                  XXUz.col((bin_index*2*Nz)+z_index)=XXUz.col((bin_index*2*Nz)+Nz+z_index);
+                  }
+         }
+        yXXy(bin_index,0)= yXXy(bin_index,1);
+}
 
 
+} //end if pass_num=2
 
-
-
-} //end if pass_num!=1
 
 
 
@@ -1809,7 +1612,6 @@ cout<<" Reading and computing  of all blocks are finished"<<endl;
 
 if(pass_num==1){
   //handle when jackknife block does not include any SNPs from a bin//refill
-
   for (int bin_index=0;bin_index<Nbin;bin_index++){
 	 for (int z_index=0;z_index<Nz;z_index++){
 		  XXz.col((bin_index*2*Nz)+z_index)=XXz.col((bin_index*2*Nz)+Nz+z_index);
@@ -1822,11 +1624,7 @@ if(pass_num==1){
   }
 }
 
-
-
-
-
-if(pass_num!=1){
+if(pass_num==2){
 for (int i=0;i<Nbin;i++){
 	c_yky(i,0)=yXXy(i,1)/len[i];
 	
@@ -1892,8 +1690,6 @@ for(int i=0;i<(Nbin+1);i++)
     point_est(i,0)=herit(i,0);
 
 }
-//cout<<"point estimates:"<<endl;
-//cout<<point_est<<endl;
 
 }
 
@@ -2120,6 +1916,7 @@ for (int i=0;i<Nz;i++)
    for(int j=0;j<Nindv;j++)
       all_zb(j,i)=all_zb(j,i)*mask(j,0);
 
+
 /*
 for (int i=0;i<Nindv;i++)
 for (int j=0;j<Nz;j++)
@@ -2202,9 +1999,6 @@ for (int j=0;j<Nbin;j++){
 point_est(Nbin,0)=temp_sig;
 
 MatrixXdr Sigmas_se=jack_se(jack);
-//cout<<"nbin"<<Nbin<<endl;
-//cout<<Sigmas_se<<endl;
-//cout<<jack<<endl;
 
 for (int i=0;i<Njack;i++){
    temp_sig=0;
@@ -2222,11 +2016,11 @@ for (int i=0;i<Njack;i++){
 cout<<endl<<"OUTPUT: "<<endl<<"Variances: "<<endl;
 outfile<<"OUTPUT: "<<endl<<"Variances: "<<endl;
 for (int j=0;j<Nbin;j++){
-        cout<<"Sigma^2_"<<j<<": "<<Sigmas(j,0)<<" ,  se: "<<Sigmas_se(j,0)<<endl;
-        outfile<<"Sigma^2_"<<j<<": "<<Sigmas(j,0)<<" ,  se: "<<Sigmas_se(j,0)<<endl;
+        cout<<"Sigma^2_"<<j<<": "<<Sigmas(j,0)<<"  SE: "<<Sigmas_se(j,0)<<endl;
+        outfile<<"Sigma^2_"<<j<<": "<<Sigmas(j,0)<<" SE: "<<Sigmas_se(j,0)<<endl;
 }
-cout<<"Sigma^2_e: "<<Sigmas(Nbin,0)<<" ,  se: "<<Sigmas_se(Nbin,0)<<endl;
-outfile<<"Sigma^2_e: "<<Sigmas(Nbin,0)<<" ,  se: "<<Sigmas_se(Nbin,0)<<endl;
+cout<<"Sigma^2_e: "<<Sigmas(Nbin,0)<<" SE: "<<Sigmas_se(Nbin,0)<<endl;
+outfile<<"Sigma^2_e: "<<Sigmas(Nbin,0)<<" SE: "<<Sigmas_se(Nbin,0)<<endl;
 
 
 
@@ -2291,8 +2085,8 @@ outfile<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based 
 cout<<endl<<"h^2's: "<<endl;
 outfile<<"h^2's: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" ,  se: "<<se_her_cat_ldsc(j,0)<<endl;
-     outfile<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" ,  se: "<<se_her_cat_ldsc(j,0)<<endl;
+     cout<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
+     outfile<<"h^2 of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
 }
 
 
@@ -2313,8 +2107,8 @@ for(int i=0;i<Njack;i++)
 cout<<endl<<"h^2_i/h^2_t: "<<endl;
 outfile<<"h^2_i/h^2_t: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<",  se: "<<se_her_cat_ldsc(j,0)<<endl;
-     outfile<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<",  se: "<<se_her_cat_ldsc(j,0)<<endl;
+     cout<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
+     outfile<<"h^2/h^2_t of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)<<" SE: "<<se_her_cat_ldsc(j,0)<<endl;
 }
 
 
@@ -2322,8 +2116,8 @@ cout<<endl<<"Enrichments: "<<endl;
 outfile<<"Enrichments: "<<endl;
 for (int j=0;j<Nbin;j++){
         double snp_por=(double)len[j]/Nsnp;
-     cout<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<",  se: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
-     outfile<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<",  se: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
+     cout<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<" SE: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
+     outfile<<"Enrichment of bin "<<j<<" : "<<point_her_cat_ldsc(j,0)/snp_por<<" SE: "<<se_her_cat_ldsc(j,0)/snp_por<<endl;
 }
 
 
@@ -2392,17 +2186,17 @@ outfile<<endl<<"h^2's (heritabilities) and e's (enrichments) are computed based 
 cout<<endl<<"h^2's: "<<endl;
 outfile<<"h^2's: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<",  se: "<<SEjack(j,0)<<endl;
-     outfile<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<",  se: "<<SEjack(j,0)<<endl;
+     cout<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<" SE: "<<SEjack(j,0)<<endl;
+     outfile<<"h^2 of bin "<<j<<" : "<<point_est(j,0)<<" SE: "<<SEjack(j,0)<<endl;
 }
-cout<<"Total h^2 : "<<point_est(Nbin,0)<<", se: "<<SEjack(Nbin,0)<<endl;
-outfile<<"Total h^2 : "<<point_est(Nbin,0)<<", se: "<<SEjack(Nbin,0)<<endl;
+cout<<"Total h^2 : "<<point_est(Nbin,0)<<" SE: "<<SEjack(Nbin,0)<<endl;
+outfile<<"Total h^2 : "<<point_est(Nbin,0)<<" SE: "<<SEjack(Nbin,0)<<endl;
 
 cout<<endl<<"Enrichments: "<<endl;
 outfile<<"Enrichments: "<<endl;
 for (int j=0;j<Nbin;j++){
-     cout<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" ,  se: "<<enrich_SEjack(j,0)<<endl;
-     outfile<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" ,  se: "<<enrich_SEjack(j,0)<<endl;
+     cout<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" SE: "<<enrich_SEjack(j,0)<<endl;
+     outfile<<"Enrichment of bin "<<j<<": "<<enrich_point_est(j,0)<<" SE: "<<enrich_SEjack(j,0)<<endl;
 }
 
 
