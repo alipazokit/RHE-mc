@@ -40,7 +40,7 @@ To estimate dominance heritability and additve heritability jointly run :
 ## Parameters
 
 ```
-genotype (-g) : The path of  genotype file
+genotype (-g) : The path of genotype file
 phenotype (-p): The path of phenotype file
 covariate (-c): The path of covariate file
 annotation (-annot): The path of annotation file.
