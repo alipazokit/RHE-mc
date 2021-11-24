@@ -169,7 +169,7 @@ bool use_1col_annot=false;
 
 
 ///Variables for reg out cov on both side of LM
-bool both_side_cov=false;
+bool both_side_cov=true;
 MatrixXdr UXXz;
 MatrixXdr XXUz;
 MatrixXdr Xz;
