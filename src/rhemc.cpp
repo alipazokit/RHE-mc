@@ -1367,7 +1367,7 @@ pheno=new_pheno.cwiseProduct(mask);
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
@@ -1378,7 +1378,7 @@ if (both_side_cov==true){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
@@ -1401,7 +1401,7 @@ if(use_cov==false){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
