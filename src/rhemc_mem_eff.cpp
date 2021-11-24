@@ -1806,6 +1806,10 @@ y_mean = y_sum/mask.sum();
 
 
 for(int i=0; i<Nindv; i++){
+<<<<<<< HEAD
+=======
+      phen_sd+=(pheno(i,0)-y_mean)*(pheno(i,0)-y_mean);  
+>>>>>>> 35541e4d2596727cc9f8bc51d5e922c7c15da048
 	if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
 }

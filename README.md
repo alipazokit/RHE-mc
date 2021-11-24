@@ -27,7 +27,7 @@ An executable file named RHEmc will be in build folder after the installation st
  ```
  ./RHEmc <command_line arguments>
 ```
-To run the highly efficient memory version : (-jn 1000 is recommended in this setting, specifically when there are many overlapping annotations)
+To run the highly memory efficient version : (-jn 1000 is recommended when there are many overlapping annotations or small annotations)
 ```
 ./RHEmc_mem <command_line arguments>
 ```
@@ -40,7 +40,7 @@ To estimate dominance heritability and additve heritability jointly run :
 ## Parameters
 
 ```
-genotype (-g) : The path of  genotype file
+genotype (-g) : The path of genotype file
 phenotype (-p): The path of phenotype file
 covariate (-c): The path of covariate file
 annotation (-annot): The path of annotation file.
