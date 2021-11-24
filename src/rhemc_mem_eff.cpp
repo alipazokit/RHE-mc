@@ -1822,7 +1822,7 @@ cout<<"make.sum()"<<mask.sum()<<endl;
 */
 for(int i=0; i<Nindv; i++){
       phen_sd+=(pheno(i,0)-y_mean)*(pheno(i,0)-y_mean);  
-	if(pheno(i,0)!=0)
+	if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
 }
 phen_sd=sqrt(phen_sd/(mask.sum()-1));
@@ -1837,7 +1837,7 @@ if (both_side_cov==true){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
@@ -1864,7 +1864,7 @@ y_mean = y_sum/mask.sum();
 //cout<<"y_mean"<<y_mean<<endl;
 
 for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
