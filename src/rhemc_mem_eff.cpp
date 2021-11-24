@@ -169,7 +169,7 @@ bool use_1col_annot=false;
 
 
 ///Variables for reg out cov on both side of LM
-bool both_side_cov=false;
+bool both_side_cov=true;
 MatrixXdr UXXz;
 MatrixXdr XXUz;
 MatrixXdr Xz;
@@ -1793,43 +1793,23 @@ covariate=covariate.cwiseProduct(mat_mask);
 
 MatrixXdr WtW= covariate.transpose()*covariate;
 Q=WtW.inverse(); // Q=(W^tW)^-1
-//cout<<" Number of covariates"<<cov_num<<endl;
 
-/*MatrixXdr v1=covariate.transpose()*pheno; //W^ty
-MatrixXdr v2=Q*v1;            //QW^ty
-MatrixXdr v3=covariate*v2;    //WQW^ty
-new_pheno=pheno-v3;
-new_pheno=new_pheno.cwiseProduct(mask);
-*/
-double phen_sd=0;
 if (both_side_cov==false){
 MatrixXdr v1=covariate.transpose()*pheno; //W^ty
 MatrixXdr v2=Q*v1;            //QW^ty
 MatrixXdr v3=covariate*v2;    //WQW^ty
 new_pheno=pheno-v3;
-//
-cout<<WtW<<endl;
-//
 pheno=new_pheno.cwiseProduct(mask);
 
-/*cout<<"y_sum"<<y_sum<<endl;
 y_sum=pheno.sum();
-cout<<"y_sum2"<<y_sum<<endl;
 y_mean = y_sum/mask.sum();
 
-cout<<"y_mean"<<y_mean<<endl;
-cout<<"make.sum()"<<mask.sum()<<endl;
-*/
+
 for(int i=0; i<Nindv; i++){
-      phen_sd+=(pheno(i,0)-y_mean)*(pheno(i,0)-y_mean);  
-	if(pheno(i,0)!=0)
+	if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
 }
-phen_sd=sqrt(phen_sd/(mask.sum()-1));
-pheno=pheno/phen_sd;
 y_sum=pheno.sum();
-//cout<<"pheno sd"<<phen_sd<<endl;
-//cout<<"pheno mean"<<y_mean<<endl;
 
 }
 
@@ -1837,7 +1817,7 @@ if (both_side_cov==true){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
@@ -1852,19 +1832,13 @@ new_pheno=new_pheno.cwiseProduct(mask);
 
 }
 	
-
-
-
 }
 if(use_cov==false){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
 
-//cout<<"y_sum"<<y_sum<<endl;  
-//cout<<"y_mean"<<y_mean<<endl;
-
 for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();

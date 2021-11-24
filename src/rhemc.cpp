@@ -1349,14 +1349,7 @@ covariate=covariate.cwiseProduct(mat_mask);
 
 MatrixXdr WtW= covariate.transpose()*covariate;
 Q=WtW.inverse(); // Q=(W^tW)^-1
-//cout<<" Number of covariates"<<cov_num<<endl;
 
-/*MatrixXdr v1=covariate.transpose()*pheno; //W^ty
-MatrixXdr v2=Q*v1;            //QW^ty
-MatrixXdr v3=covariate*v2;    //WQW^ty
-new_pheno=pheno-v3;
-new_pheno=new_pheno.cwiseProduct(mask);
-*/
 if (both_side_cov==false){
 MatrixXdr v1=covariate.transpose()*pheno; //W^ty
 MatrixXdr v2=Q*v1;            //QW^ty
@@ -1367,7 +1360,7 @@ pheno=new_pheno.cwiseProduct(mask);
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
@@ -1378,7 +1371,7 @@ if (both_side_cov==true){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
@@ -1401,7 +1394,7 @@ if(use_cov==false){
 y_sum=pheno.sum();
 y_mean = y_sum/mask.sum();
   for(int i=0; i<Nindv; i++){
-       if(pheno(i,0)!=0)
+       if(mask(i,0)!=0)
            pheno(i,0) =pheno(i,0) - y_mean; //center phenotype
   }
 y_sum=pheno.sum();
