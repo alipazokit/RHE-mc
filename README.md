@@ -45,7 +45,7 @@ phenotype (-p): The path of phenotype file
 covariate (-c): The path of covariate file
 annotation (-annot): The path of annotation file.
 num_vec (-k) : The number of random vectors (10 is recommended). 
-num_block (-jn): The number of jackknife blocks. (100 or 22 are recommended). The higher number of jackknife blocks the higher memory usage.
+num_block (-jn): The number of jackknife blocks. (100 is recommended). The higher number of jackknife blocks the higher memory usage.
 out_put (-o): The path of output file.
 
 
