@@ -28,8 +28,11 @@ An executable file named RHEmc will be in build folder after the installation st
  ./RHEmc <command_line arguments>
 ```
 To run the highly memory efficient version : (-jn 1000 is recommended when there are many overlapping annotations or small annotations)
+
+The memory usage of RHEmc_mem does not depend on number of jackknife blocks.
 ```
 ./RHEmc_mem <command_line arguments>
+
 ```
 To estimate dominance heritability and additve heritability jointly run :
 
