@@ -28,8 +28,11 @@ An executable file named RHEmc will be in build folder after the installation st
  ./RHEmc <command_line arguments>
 ```
 To run the highly memory efficient version : (-jn 1000 is recommended when there are many overlapping annotations or small annotations)
+
+The memory usage of RHEmc_mem does not depend on number of jackknife blocks.
 ```
 ./RHEmc_mem <command_line arguments>
+
 ```
 To estimate dominance heritability and additve heritability jointly run :
 
@@ -45,7 +48,7 @@ phenotype (-p): The path of phenotype file
 covariate (-c): The path of covariate file
 annotation (-annot): The path of annotation file.
 num_vec (-k) : The number of random vectors (10 is recommended). 
-num_block (-jn): The number of jackknife blocks. (100 or 22 are recommended). The higher number of jackknife blocks the higher memory usage.
+num_block (-jn): The number of jackknife blocks. (100 is recommended). The higher number of jackknife blocks the higher memory usage.
 out_put (-o): The path of output file.
 
 
