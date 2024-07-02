@@ -1,3 +1,9 @@
+# Downloading the Latest Version
+
+To download the latest version of the code, please visit (https://github.com/sriramlab/RHE-mc)
+
+
+
 # RHE-mc
 Randomized Haseman–Elston regression for Multi-variance Components
 
